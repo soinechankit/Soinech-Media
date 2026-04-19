@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html class="dark scroll-smooth" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Soinech Media | Architecting Creator Empires</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#DDB7FF",
+                        "primary-dark": "#B76DFF",
+                        "accent": "#4CD7F6",
+                        "surface": "#050505",
+                        "surface-light": "#121212",
+                        "money": "#4AE176"
+                    },
+                    fontFamily: {
+                        "display": ["Outfit", "sans-serif"],
+                        "body": ["Plus Jakarta Sans", "sans-serif"],
+                    },
+                    animation: {
+                        'slow-spin': 'spin 12s linear infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-glow': 'pulse-glow 3s infinite',
+                        'gradient-flow': 'gradient-flow 3s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0) scale(1)' },
+                            '50%': { transform: 'translateY(-20px) scale(1.05)' },
+                        },
+                        'pulse-glow': {
+                            '0%, 100%': { opacity: '0.4', filter: 'blur(80px)' },
+                            '50%': { opacity: '0.8', filter: 'blur(120px)' },
+                        },
+                        'gradient-flow': {
+                            '0%': { backgroundPosition: '0% 50%' },
+                            '100%': { backgroundPosition: '200% 50%' }
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        /* Fix for horizontal scroll */
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+            background: #050505;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(183, 109, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* CLIPPING ANIMATION FOR OVERLAY */
+        .clip-path-circle {
+            clip-path: circle(0% at 90% 10%);
+        }
+
+        #full-nav.open {
+            clip-path: circle(150% at 90% 10%);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* NAVIGATION LINKS: ULTRA-BOLD & WHITE */
+        .nav-item {
+            font-weight: 900;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            color: #ffffff;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 5px 0;
+        }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: #DDB7FF;
+            transition: width 0.3s ease;
+        }
+
+        .nav-item:hover {
+            color: #DDB7FF;
+            transform: translateY(-2px);
+        }
+
+        .nav-item:hover::after {
+            width: 100%;
+        }
+
+        .nav-giant {
+            font-size: clamp(3rem, 12vw, 8rem);
+            font-weight: 1000;
+            color: white;
+            line-height: 0.8;
+            letter-spacing: -0.05em;
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            width: fit-content;
+            text-decoration: none;
+            display: block;
+        }
+
+        .nav-giant:hover {
+            color: transparent;
+            -webkit-text-stroke: 2px #fff;
+            transform: translateX(40px) skewX(-5deg);
+        }
+
+        /* SCROLL STATE */
+        header.scrolled #nav-container {
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(25px);
+            padding-top: 0.8rem;
+            padding-bottom: 0.8rem;
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        /* STAGGERED REVEAL */
+        .stagger-item {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        #full-nav.open .stagger-item {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #full-nav.open .stagger-item:nth-child(1) { transition-delay: 0.1s; }
+        #full-nav.open .stagger-item:nth-child(2) { transition-delay: 0.2s; }
+        #full-nav.open .stagger-item:nth-child(3) { transition-delay: 0.3s; }
+        #full-nav.open .stagger-item:nth-child(4) { transition-delay: 0.4s; }
+        #full-nav.open .stagger-item:nth-child(5) { transition-delay: 0.5s; }
+
+        body.nav-active {
+            overflow: hidden;
+        }
+
+        .animate-gradient-flow {
+            background-size: 200% auto;
+            animation: gradient-flow 4s linear infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-surface text-zinc-300 font-body selection:bg-primary/30">
+
+<header id="header" class="fixed top-0 left-0 w-full z-[100] transition-all duration-700 px-4 py-4 md:px-8">
+    <div class="max-w-[1440px] mx-auto relative">
+        <div id="nav-container" class="flex justify-between items-center px-6 py-4 transition-all duration-500 rounded-[20px] md:rounded-[30px] border border-white/5 bg-black/20 backdrop-blur-0">
+            
+            <a href="/" class="group flex flex-col no-underline">
+                <div class="flex items-center">
+                    <span class="text-2xl md:text-3xl font-[1000] tracking-tighter text-white uppercase leading-none">
+                        SOINECH<span class="text-primary group-hover:rotate-[30deg] inline-block transition-transform duration-300">.</span>
+                    </span>
+                </div>
+                <div class="overflow-hidden h-[12px]">
+                    <span class="block text-[8px] font-black tracking-[0.6em] text-zinc-500 uppercase transition-transform duration-500 group-hover:-translate-y-full">Media Agency</span>
+                    <span class="block text-[8px] font-black tracking-[0.6em] text-primary uppercase transition-transform duration-500 group-hover:-translate-y-full">Scale Now</span>
+                </div>
+            </a>
+
+            <nav class="hidden lg:flex items-center gap-10">
+                <a href="/what-we-do.html" class="nav-item">What we do</a>
+                <a href="/work.html" class="nav-item">Work</a>
+                <a href="/FAQ.html" class="nav-item">FAQ</a>
+                <a href="/commerce.html" class="nav-item">Commerce</a>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <a href="/contactus.html" class="hidden sm:block group relative">
+                    <button class="relative bg-white text-black text-[11px] font-[1000] uppercase px-8 py-3 rounded-full overflow-hidden transition-all duration-500 hover:text-white">
+                        <span class="relative z-10">Work with us</span>
+                        <div class="absolute inset-0 bg-primary translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                    </button>
+                </a>
+                
+                <button id="menu-trigger" class="w-12 h-12 flex flex-col justify-center items-center gap-1.5 bg-white/5 rounded-full border border-white/10 group transition-all hover:bg-white hover:border-white">
+                    <span class="w-5 h-[2.5px] bg-white group-hover:bg-black transition-all"></span>
+                    <span class="w-3 h-[2.5px] bg-primary group-hover:w-5 transition-all"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="full-nav" class="fixed inset-0 w-full h-screen bg-[#050505] clip-path-circle z-[110] flex flex-col md:flex-row pointer-events-none opacity-0 transition-all duration-700 ease-[cubic-bezier(0.85,0,0.15,1)]">
+        
+        <button id="close-nav" class="absolute top-10 right-10 w-16 h-16 border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition-all duration-500 flex items-center justify-center z-[120] cursor-pointer">
+            <span class="text-2xl font-light">✕</span>
+        </button>
+
+        <div class="absolute inset-0 overflow-hidden opacity-10">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[30vw] font-black text-white/5 select-none uppercase">SOINECH</div>
+        </div>
+
+        <div class="flex-1 p-12 md:p-32 flex flex-col justify-center gap-4 relative z-10">
+            <span class="text-primary text-[10px] font-black uppercase tracking-[0.5em] mb-4 stagger-item">Menu Directory</span>
+            <div class="flex flex-col gap-2">
+                <a href="/what-we-do.html" class="nav-giant stagger-item">What we do</a>
+                <a href="/work.html" class="nav-giant stagger-item">Work</a>
+                <a href="/FAQ.html" class="nav-giant stagger-item">FAQ</a>
+                <a href="/commerce.html" class="nav-giant stagger-item">Commerce</a>
+            </div>
+            
+            <div class="mt-12 flex gap-8 stagger-item">
+                <a href="#" class="text-zinc-500 hover:text-white text-xs font-black tracking-widest uppercase transition-colors">Instagram</a>
+                <a href="#" class="text-zinc-500 hover:text-white text-xs font-black tracking-widest uppercase transition-colors">LinkedIn</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <main class="overflow-x-hidden">
+<section id="contact" class="relative pt-32 md:pt-24 lg:pt-32 pb-20 md:pb-32 px-4 md:px-6 overflow-hidden bg-[#050505]">
+    <div class="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
+        <div class="absolute top-[-5%] left-[-5%] w-[60%] h-[50%] bg-primary/20 rounded-full blur-[100px] md:blur-[150px]"></div>
+        <div class="absolute bottom-[-5%] right-[-5%] w-[60%] h-[50%] bg-accent/20 rounded-full blur-[100px] md:blur-[150px]"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+        <div class="reveal text-center mb-10 md:mb-16 lg:mb-20">
+            <div class="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-6">
+                <span class="text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] text-primary">Direct Access Channel</span>
+            </div>
+            <h2 class="font-display text-5xl md:text-7xl lg:text-8xl font-[1000] text-white tracking-tighter leading-[1] md:leading-none mb-6">
+                JOIN THE <br class="hidden md:block"/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-money animate-gradient-flow">Soinech Media.</span>
+            </h2>
+            <p class="text-zinc-500 text-sm md:text-lg max-w-2xl mx-auto font-medium uppercase tracking-[0.15em] md:tracking-[0.2em] leading-relaxed px-4">
+                Strategic Partnerships for the Digital Elite
+            </p>
+        </div>
+
+        <div class="flex flex-col lg:grid lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12">
+            
+            <div class="reveal group relative w-full">
+                <div class="absolute -inset-1 bg-gradient-to-b from-primary/50 to-transparent rounded-[2.5rem] md:rounded-[3rem] blur opacity-10 group-hover:opacity-30 transition duration-500"></div>
+                <div class="relative h-full glass-card p-8 md:p-10 lg:p-14 rounded-[2.5rem] md:rounded-[3rem] border border-white/5 bg-zinc-900/40 backdrop-blur-3xl flex flex-col justify-between overflow-hidden">
+                    <div>
+                        <h3 class="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">Talent Management</h3>
+                        <h4 class="text-3xl md:text-4xl lg:text-5xl font-display font-[1000] text-white mb-4 md:mb-6 uppercase">FOR <br class="hidden md:block"/>CREATORS</h4>
+                        <p class="text-zinc-400 text-base md:text-lg leading-relaxed mb-8 md:mb-10 max-w-sm">
+                            Ready for elite representation? We architect your long-term IP, optimize brand deals, and execute global expansion.
+                        </p>
+                    </div>
+                    
+                    <button onclick="sendInquiry('Creator')" class="w-full py-5 md:py-6 rounded-xl md:rounded-2xl bg-primary text-black font-black uppercase tracking-[0.2em] text-sm md:text-base hover:bg-white hover:text-black transition-all duration-500 transform group-hover:translate-y-[-4px] shadow-xl">
+                        Apply for Representation
+                    </button>
+                </div>
+            </div>
+
+            <div class="reveal group relative w-full">
+                <div class="absolute -inset-1 bg-gradient-to-b from-accent/50 to-transparent rounded-[2.5rem] md:rounded-[3rem] blur opacity-10 group-hover:opacity-30 transition duration-500"></div>
+                <div class="relative h-full glass-card p-8 md:p-10 lg:p-14 rounded-[2.5rem] md:rounded-[3rem] border border-white/5 bg-zinc-900/40 backdrop-blur-3xl flex flex-col justify-between overflow-hidden">
+                    <div>
+                        <h3 class="text-[10px] font-black text-accent uppercase tracking-[0.4em] mb-4">Strategic Growth</h3>
+                        <h4 class="text-3xl md:text-4xl lg:text-5xl font-display font-[1000] text-white mb-4 md:mb-6 uppercase">FOR <br class="hidden md:block"/>BRANDS</h4>
+                        <p class="text-zinc-400 text-base md:text-lg leading-relaxed mb-8 md:mb-10 max-w-sm">
+                            Access the world’s most influential voices. Request our exclusive roster and data-driven talent deck.
+                        </p>
+                    </div>
+                    
+                    <button onclick="sendInquiry('Brand')" class="w-full py-5 md:py-6 rounded-xl md:rounded-2xl bg-white text-black font-black uppercase tracking-[0.2em] text-sm md:text-base hover:bg-accent hover:text-white transition-all duration-500 transform group-hover:translate-y-[-4px] shadow-xl">
+                        Request Talent Desk
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="reveal text-center mt-16 md:mt-20 px-4">
+            <p class="text-zinc-600 uppercase tracking-[0.5em] text-[10px] mb-4 md:mb-6 font-black">Global HQ Operations</p>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-16">
+                <a href="mailto:media@soinech.com" class="text-white text-xl md:text-2xl lg:text-3xl font-bold font-display hover:text-primary transition-all hover:tracking-widest">media@soinech.com</a>
+                <span class="hidden md:block w-2 h-2 rounded-full bg-zinc-800"></span>
+                <p class="text-zinc-400 text-lg md:text-xl font-medium font-display tracking-tight">Dubai <span class="text-zinc-800 mx-3">/</span> India</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function sendInquiry(role) {
+    const recipient = "media@soinech.com";
+    let subject = "";
+    let body = "";
+
+    if (role === 'Creator') {
+        subject = encodeURIComponent("CREATOR APPLICATION: Request for Representation");
+        body = encodeURIComponent(
+            "SOINECH MEDIA | REPRESENTATION FORM\n" +
+            "==============================\n\n" +
+            "CREATOR NAME: \n" +
+            "PRIMARY HANDLE: \n" +
+            "NICHE / CONTENT TYPE: \n" +
+            "CURRENT AUDIENCE SIZE: \n\n" +
+            "WHY SOINECH?:\n" +
+            "(Briefly describe your vision for growth)\n\n" +
+            "==============================\n" +
+            "Sent via Soinech Media Talent Portal."
+        );
+    } else {
+        subject = encodeURIComponent("BRAND INQUIRY: Request for Talent Desk / Deck");
+        body = encodeURIComponent(
+            "SOINECH MEDIA | BRAND PARTNERSHIP\n" +
+            "==============================\n\n" +
+            "COMPANY NAME: \n" +
+            "CONTACT PERSON: \n" +
+            "CAMPAIGN OBJECTIVES: \n" +
+            "TARGET CREATOR CATEGORY: \n\n" +
+            "ADDITIONAL NOTES:\n" +
+            "(e.g. Estimated timeline or specific talent interest)\n\n" +
+            "==============================\n" +
+            "Sent via Soinech Media Talent Portal."
+        );
+    }
+    window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
+}
+</script>
+    </main>
+
+<footer class="bg-surface py-20 px-6 border-t border-white/5">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
+        <div class="text-3xl font-black text-white font-display">SOINECH MEDIA<span class="text-primary-dark">.</span></div>
+        <p class="text-[10px] text-zinc-600 uppercase tracking-widest font-bold">© 2026 SOINECH • ALL RIGHTS RESERVED</p>
+    </div>
+</footer>
+
+<script>
+    // NAVIGATION LOGIC
+    const trigger = document.getElementById('menu-trigger');
+    const closeBtn = document.getElementById('close-nav');
+    const fullNav = document.getElementById('full-nav');
+    const links = document.querySelectorAll('.nav-giant');
+
+    const openMenu = () => {
+        fullNav.classList.add('open');
+        document.body.classList.add('nav-active');
+    };
+
+    const closeMenu = () => {
+        fullNav.classList.remove('open');
+        document.body.classList.remove('nav-active');
+    };
+
+    trigger.addEventListener('click', openMenu);
+    closeBtn.addEventListener('click', (e) => { e.preventDefault(); closeMenu(); });
+    links.forEach(l => l.addEventListener('click', closeMenu));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+
+    // SCROLL ANIMATION & HEADER EFFECT
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) entry.target.classList.add('active');
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    window.addEventListener('scroll', () => {
+        const header = document.getElementById('header');
+        if (window.scrollY > 50) header.classList.add('scrolled');
+        else header.classList.remove('scrolled');
+    });
+</script>
+
+</body>
+</html>
