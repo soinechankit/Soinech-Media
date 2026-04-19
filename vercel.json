@@ -1,9 +1,3 @@
 {
-  "redirects": [
-    { "source": "/contactus.html", "destination": "/contactus", "permanent": true },
-    { "source": "/commerce.html", "destination": "/commerce", "permanent": true },
-    { "source": "/what-we-do.html", "destination": "/what-we-do", "permanent": true },
-    { "source": "/work.html", "destination": "/work", "permanent": true },
-    { "source": "/faq.html", "destination": "/faq", "permanent": true }
-  ]
+  "cleanUrls": true
 }
