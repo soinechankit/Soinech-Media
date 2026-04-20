@@ -1924,7 +1924,7 @@ body.nav-active {
 
     .influence-section {
         background-color: #080808;
-        padding: 120px 20px;
+        padding: 70px 20px;
         font-family: 'Plus Jakarta Sans', sans-serif;
         display: flex;
         justify-content: center;
@@ -2020,9 +2020,26 @@ body.nav-active {
     }
 
     @media (max-width: 768px) {
-        .value-item:not(:last-child)::after { display: none; }
-        .value-list { flex-direction: column; gap: 10px; }
+    /* Dot/Separator ko hide karne ke liye */
+    .value-item:not(:last-child)::after { 
+        display: none; 
     }
+
+    .value-list { 
+        flex-direction: column; /* Items ko upar-neeche karne ke liye */
+        gap: 10px; 
+        align-items: center;    /* Items ko horizontally center karne ke liye (Sabse Important) */
+        justify-content: center; 
+        text-align: center;     /* Text centering ke liye safety measure */
+    }
+
+    .value-item {
+        margin: 0;             /* Extra margins hatane ke liye */
+        width: 100%;           /* Container ke center mein alignment pakadne ke liye */
+        justify-content: center; 
+    }
+
+}
 </style>
 
 <section class="influence-section">
